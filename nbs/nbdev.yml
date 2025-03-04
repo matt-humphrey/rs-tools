@@ -1,0 +1,9 @@
+project:
+  output-dir: _docs
+
+website:
+  title: "pain"
+  site-url: "https://matt-humphrey.github.io/pain"
+  description: "Raine Study Data Harmonisation - Back Pain"
+  repo-branch: main
+  repo-url: "https://github.com/matt-humphrey/pain"
