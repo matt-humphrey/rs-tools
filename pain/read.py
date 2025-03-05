@@ -91,8 +91,12 @@ class Dataset:
     #     return df
 
 # %% ../nbs/00_read.ipynb 15
-# TODO: update for meta
-def read_and_filter_data(datasets: list[Dataset]) -> list[pl.LazyFrame]:
+def read_and_filter_data(datasets: list[Dataset]
+                         ) -> list[pl.LazyFrame]:
+    """
+    Take a list of `Dataset`s and return a list of the respective dataframes 
+    and metadata for each dataset, filtered for the given columns.
+    """
     dataframes = []
     metadata = []
     for ds in datasets:
@@ -101,7 +105,9 @@ def read_and_filter_data(datasets: list[Dataset]) -> list[pl.LazyFrame]:
         metadata.append(meta)
     return dataframes, metadata
 
-def combine_dataframes(dataframes: list[pl.LazyFrame]) -> pl.LazyFrame:
+def combine_dataframes(dataframes: list[pl.LazyFrame]
+                       ) -> pl.LazyFrame:
+    "Take a list of dataframes and return a single, combined dataframe."
     combined_df = dataframes[0]
     for df in dataframes[1:]:
         combined_df = combined_df.join(df, on="ID", how="full", coalesce=True)
@@ -110,7 +116,10 @@ def combine_dataframes(dataframes: list[pl.LazyFrame]) -> pl.LazyFrame:
 # %% ../nbs/00_read.ipynb 17
 from collections import defaultdict
 
-def merge_dictionaries(dicts: list[dict[str, Any]]) -> dict[str, Any]:
+# %% ../nbs/00_read.ipynb 18
+def merge_dictionaries(dicts: list[dict[str, Any]]
+                       ) -> dict[str, Any]:
+    "Merge a series of nested dictionaries."
     merged_dict = defaultdict(dict)
     for d in dicts:
         for key, nested_dict in d.items():
