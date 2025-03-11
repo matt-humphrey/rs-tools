@@ -14,6 +14,7 @@ import pyreadstat
 import pyspssio
 from pathlib import Path
 from typing import Optional, Any
+from rich import print as rprint
 
 from fastcore.utils import *
 from fastcore.test import *
@@ -213,5 +214,6 @@ def write_sav(dst_path: str|Path, # path to save output file
         variable_value_labels=metadata["Field Values"],
         variable_display_width=metadata["Field Width"],
         variable_measure=metadata["Variable Type"], # TODO: convert to all lowercase
-        variable_format=pack_variable_types(metadata)
+        variable_format=pack_variable_types(metadata),
+        row_compress=True
     )
