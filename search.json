@@ -1,0 +1,72 @@
+[
+  {
+    "objectID": "index.html",
+    "href": "index.html",
+    "title": "pain",
+    "section": "",
+    "text": "This file will become your README and also the index of your documentation.",
+    "crumbs": [
+      "pain"
+    ]
+  },
+  {
+    "objectID": "index.html#developer-guide",
+    "href": "index.html#developer-guide",
+    "title": "pain",
+    "section": "Developer Guide",
+    "text": "Developer Guide\nIf you are new to using nbdev here are some useful pointers to get you started.\n\nInstall pain in Development mode\n# make sure pain package is installed in development mode\n$ pip install -e .\n\n# make changes under nbs/ directory\n# ...\n\n# compile to have changes apply to pain\n$ nbdev_prepare",
+    "crumbs": [
+      "pain"
+    ]
+  },
+  {
+    "objectID": "index.html#usage",
+    "href": "index.html#usage",
+    "title": "pain",
+    "section": "Usage",
+    "text": "Usage\n\nInstallation\nInstall latest from the GitHub repository:\n$ pip install git+https://github.com/matt-humphrey/pain.git\nor from conda\n$ conda install -c matt-humphrey pain\nor from pypi\n$ pip install pain\n\n\nDocumentation\nDocumentation can be found hosted on this GitHub repository’s pages. Additionally you can find package manager specific guidelines on conda and pypi respectively.",
+    "crumbs": [
+      "pain"
+    ]
+  },
+  {
+    "objectID": "index.html#how-to-use",
+    "href": "index.html#how-to-use",
+    "title": "pain",
+    "section": "How to use",
+    "text": "How to use\nFill me in please! Don’t forget code examples:\n\n1+1\n\n2",
+    "crumbs": [
+      "pain"
+    ]
+  },
+  {
+    "objectID": "read.html",
+    "href": "read.html",
+    "title": "read",
+    "section": "",
+    "text": "Create classes to represent Data, Metadata, and Dataset? (dataset being the combination of the two, with fns which link them; ie. for cross-checking the type defined in meta is what the data type actually is)\nFor Meta, can be read in different formats, and then exported in different formats\n\nFor dataset, meta must be a particular format\n\nFilter out rows with all nulls\n\n\nRAW_DATA = Path(\"../data/raw\")\nPROCESSED_DATA = Path(\"../data/processed\")\ndf, meta = pyspssio.read_sav(RAW_DATA/\"G214_PQ.sav\")\ndf = pl.from_pandas(df)\n\n\nsource",
+    "crumbs": [
+      "read"
+    ]
+  },
+  {
+    "objectID": "read.html#writing-files",
+    "href": "read.html#writing-files",
+    "title": "read",
+    "section": "Writing Files",
+    "text": "Writing Files\n\nsource\n\nconvert_metadata_list_to_dict\n\n convert_metadata_list_to_dict (metadata:list[__main__.Metadata], p:str)\n\nTake a list of Metadata objects and convert them into the SPSS format with parameters as parents and variables as children, in nested dictionaries.\n\n\n\n\nType\nDetails\n\n\n\n\nmetadata\nlist\nlist of Metadata objects\n\n\np\nstr\nPrefix for dataset\n\n\nReturns\ndict\n\n\n\n\n\nsource\n\n\npack_variable_types\n\n pack_variable_types (m:dict[dict[str,typing.Any]])\n\nConvert metadata parameters related to variable format into an appropriate schema for pyreadstat.\n\n\n\n\nType\nDetails\n\n\n\n\nm\ndict\nmetadata in nested dictionary format\n\n\nReturns\ndict\n\n\n\n\n\nft = {\n    'G214_PQ_PN17': 'Numeric',\n    'G214_PQ_DNWN': 'Date',\n    'G214_PQ_HOC1': 'String'\n}\n\nfw = {\n    'G214_PQ_PN17': 3,\n    'G214_PQ_DNWN': 8,\n    'G214_PQ_HOC1': 8\n}\n\nd = {\n    'G214_PQ_PN17': 0,\n    'G214_PQ_DNWN': 0,\n    'G214_PQ_HOC1': 0\n}\n\nm = {\n    \"Field Type\": ft,\n    \"Field Width\": fw,\n    \"Decimals\": d\n}\n\nexpected_output = {\n    'G214_PQ_PN17': \"F3\",\n    'G214_PQ_DNWN': \"DATE8\",\n    'G214_PQ_HOC1': \"A8\"\n}\n\ntest_eq(pack_variable_types(m), expected_output)\n\n\nsource\n\n\nwrite_sav\n\n write_sav (dst_path:str|pathlib.Path,\n            df:polars.lazyframe.frame.LazyFrame,\n            metadata:dict[str,dict[str,typing.Any]])\n\nSave dataset to SPSS using pyreadstat library.\n\n\n\n\nType\nDetails\n\n\n\n\ndst_path\nstr | pathlib.Path\npath to save output file\n\n\ndf\nLazyFrame\nraw data\n\n\nmetadata\ndict\ncorresponding metadata\n\n\nReturns\nNone\n\n\n\n\nVerify that the custom SPSS writing function makes no unintended changes.\n\n# Read dataset\nG214_PQ = Dataset(\"G214_PQ.sav\", RAW_DATA)\ndf1, meta1 = G214_PQ.load_data()\n\n# Write the dataset unchanged to a new file\nwrite_sav(PROCESSED_DATA/\"G214_PQ.sav\", df1, meta1)\n\n# Read that newly saved file\noutput = Dataset(\"G214_PQ.sav\", PROCESSED_DATA)\ndf2, meta2 = output.load_data()\n\n# Compare for both data and metadata to verify no unintended changes have been introduced\nassert_frame_equal(df1, df2)\ntest_eq(meta1, meta2)",
+    "crumbs": [
+      "read"
+    ]
+  },
+  {
+    "objectID": "explore.html",
+    "href": "explore.html",
+    "title": "explore",
+    "section": "",
+    "text": "data_dir = Path(\"../data/raw\")\ndatasets = [\n    Dataset(\"G214_PQ.sav\", data_dir, \"G214_PQ_\", [\"ID\", \"G214_PQ_PN17\", \"G214_PQ_PN25\", \"G214_PQ_PN34\", \"G214_PQ_PN35\", \"G214_PQ_PN36\"]),\n    Dataset(\"G214_SQ.sav\", data_dir, \"G214_SQ_\", [\"ID\", \"G214_SQ_PN17\", \"G214_SQ_PN25\", \"G214_SQ_PN34\", \"G214_SQ_PN35\", \"G214_SQ_PN36\"]),\n    Dataset(\"G217_PQ.sav\", data_dir, \"G217_PQ_\", [\"ID\", \"G217_PQ_PN17\", \"G217_PQ_PN25\", \"G217_PQ_PN34\", \"G217_PQ_PN35\", \"G217_PQ_PN36\", \"G217_PQ_PN38\", \"G217_PQ_PN9\"]),\n    Dataset(\"G217_SQ.sav\", data_dir, \"G217_SQ_\", [\"ID\", \"G217_SQ_PN17\", \"G217_SQ_PN25\", \"G217_SQ_PN34\", \"G217_SQ_PN35\", \"G217_SQ_PN36\", \"G217_SQ_PN38\", \"G217_SQ_PN9\"])\n]\ndataframes, metadata = read_and_filter_data(datasets)\nmerged_df = combine_dataframes(dataframes)\nmerged_metadata = merge_dictionaries(metadata)\n\nDefine a function which takes a string and outputs a dictionary of the unique values for all columns that match that string.\n\nsource\n\nunique_values\n\n unique_values (df:polars.lazyframe.frame.LazyFrame, pattern:str)\n\nOutput a tuple of the unique values for each column in a given dataframe that matches the pattern.\n\nsource\n\n\nunpack_unique_values\n\n unpack_unique_values (df:polars.lazyframe.frame.LazyFrame, col:str)\n\nReturn a tuple of the unique values for a given column in a dataframe.\n\nsource\n\n\nfilter_columns\n\n filter_columns (pattern:str, columns:list[str])\n\nReturn a list of all columns that match a given regex pattern.\n\nunique_values(merged_df, \"PN38\")\n\n{'G217_PQ_PN38': (None, 0.0, 1.0, 7.0, 9.0),\n 'G217_SQ_PN38': (None, 0.0, 1.0, 9.0)}\n\n\nNow define a function to explore the metadata for a particular variable across datasets. It should again take a string, and return a nested dictionary.\n\nsource\n\n\nfilter_metadata\n\n filter_metadata (pattern:str, df:polars.lazyframe.frame.LazyFrame,\n                  m:dict[dict[str,typing.Any]])\n\nFilter metadata for given columns that match the provided pattern.\n\n\n\n\nType\nDetails\n\n\n\n\npattern\nstr\nstring or regex to filter columns,\n\n\ndf\nLazyFrame\nmerged dataframe,\n\n\nm\ndict\nmerged metadata\n\n\nReturns\ndict\n\n\n\n\n\npattern = \"PN25\"\nfiltered_metadata = filter_metadata(pattern, merged_df, merged_metadata)\npd.DataFrame(filtered_metadata).T\n\n\n\n\n\n\n\n\nG214_PQ_PN25\nG214_SQ_PN25\nG217_PQ_PN25\nG217_SQ_PN25\n\n\n\n\nLabel\nSeek pro advice for back pain\nSeek pro advice for back pain\nEver sought health professional advice/treatme...\nSeek treatment for back pain?\n\n\nField Type\nNumeric\nNumeric\nNumeric\nNumeric\n\n\nField Width\n8\n8\n8\n8\n\n\nDecimals\n0\n0\n0\n0\n\n\nVariable Type\nscale\nscale\nscale\nscale\n\n\nField Values\n{0.0: 'No', 1.0: 'Yes', 8.0: 'Not applicable',...\n{0.0: 'No', 1.0: 'Yes', 8.0: 'Not applicable',...\n{0.0: 'No', 1.0: 'Yes', 7.0: 'Involved in inco...\n{0.0: 'No', 1.0: 'Yes', 9.0: 'Not stated'}",
+    "crumbs": [
+      "explore"
+    ]
+  }
+]
