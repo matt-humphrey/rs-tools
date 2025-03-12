@@ -122,6 +122,7 @@ def combine_dataframes(dataframes: list[pl.LazyFrame]
 
 # %% ../nbs/00_read.ipynb 17
 from collections import defaultdict
+from copy import deepcopy
 
 # %% ../nbs/00_read.ipynb 18
 def merge_dictionaries(dicts: list[dict[str, Any]]
@@ -129,12 +130,12 @@ def merge_dictionaries(dicts: list[dict[str, Any]]
     "Merge a series of nested dictionaries."
     merged_dict = defaultdict(dict)
     for d in dicts:
-        for key, nested_dict in d.items():
+        # Create a deep copy to avoid mutating original data
+        d_copy = deepcopy(d)
+        for key, nested_dict in d_copy.items():
             for nested_key, value in nested_dict.items():
                 if nested_key not in merged_dict[key]:
                     merged_dict[key][nested_key] = value
-                elif isinstance(value, dict):
-                    merged_dict[key][nested_key].update(value)
     return dict(merged_dict)
 
 # %% ../nbs/00_read.ipynb 21
@@ -156,7 +157,7 @@ def convert_metadata_list_to_dict(metadata: list[Metadata], # list of Metadata o
     return converted_metadata
 
 # %% ../nbs/00_read.ipynb 22
-def pack_variable_types(m: dict[dict[str, Any]] # metadata in nested dictionary format
+def pack_variable_types(m: dict[dict[str, Any]], # metadata in nested dictionary format
                         ) -> dict[str, str]:
     """
     Convert metadata parameters related to variable format 
@@ -168,6 +169,13 @@ def pack_variable_types(m: dict[dict[str, Any]] # metadata in nested dictionary 
     
     # Verify that variables are identical across each metadata parameter
     assert field_type.keys() == field_width.keys() == decimals.keys(), "Not all variables match."
+
+    # TODO: incorporate the following if a flag like `ignore` or `auto_reformat` is set to True
+    # ft = set(final_meta1["Field Type"].keys())
+    # fw = set(final_meta1["Field Width"].keys())
+    # common_keys = fw & ft
+    # updated_fw = {k: v for k, v in final_meta1["Field Width"].items() if k in common_keys}
+    # final_meta1["Field Width"] = updated_fw
 
     result = _pack_variable_types(field_type, field_width, decimals)
     return result
