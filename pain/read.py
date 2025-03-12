@@ -46,7 +46,7 @@ def unpack_variable_types(input_dict):
             field_type[key] = 'Numeric'
             dec = value.split('.')[1]
             decimals[key] = int(dec) if dec != '0' else 0
-        elif value.startswith('DATE'):
+        elif value.startswith(('EDATE', 'DATE')):
             field_type[key] = 'Date'
             decimals[key] = 0
         elif value.startswith('A'):
