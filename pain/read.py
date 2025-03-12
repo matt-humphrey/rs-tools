@@ -157,7 +157,10 @@ def convert_metadata_list_to_dict(metadata: list[Metadata], # list of Metadata o
     return converted_metadata
 
 # %% ../nbs/00_read.ipynb 22
-def pack_variable_types(m: dict[dict[str, Any]], # metadata in nested dictionary format
+import warnings
+
+# %% ../nbs/00_read.ipynb 23
+def pack_variable_types(m: dict[str, dict[str, Any]], # metadata in nested dictionary format
                         ) -> dict[str, str]:
     """
     Convert metadata parameters related to variable format 
@@ -167,45 +170,58 @@ def pack_variable_types(m: dict[dict[str, Any]], # metadata in nested dictionary
     field_width = m["Field Width"]
     decimals = m["Decimals"]
     
-    # Verify that variables are identical across each metadata parameter
-    assert field_type.keys() == field_width.keys() == decimals.keys(), "Not all variables match."
+    combined_types = _combine_dicts(field_type, field_width, decimals)
 
-    # TODO: incorporate the following if a flag like `ignore` or `auto_reformat` is set to True
-    # ft = set(final_meta1["Field Type"].keys())
-    # fw = set(final_meta1["Field Width"].keys())
-    # common_keys = fw & ft
-    # updated_fw = {k: v for k, v in final_meta1["Field Width"].items() if k in common_keys}
-    # final_meta1["Field Width"] = updated_fw
+    return _pack_variable_types(combined_types)
 
-    result = _pack_variable_types(field_type, field_width, decimals)
-    return result
+def _combine_dicts(ft: dict[str, str], 
+                   fw: dict[str, int], 
+                   d: dict[str, int],
+                   warn: bool = True
+                   ) -> dict[str, tuple[Any, Any, Any]]:
+    """
+    Combine three dictionaries into one, with shared keys and tuple values, 
+    and raise warnings for non-shared keys.
+    """
+    # Find the intersection of keys
+    shared_keys = set(ft.keys()) & set(fw.keys()) & set(d.keys())
     
-def _pack_variable_types(field_type: dict[str, str],
-                         field_width: dict[str, int],
-                         decimals: dict[str, int]
-                         ) -> dict[str, str]:
-    """Private function to perform the logic for `pack_variable_types`."""
-    d = {}
-
-    field_type_map = {
+    # Find keys that are not shared across all dictionaries
+    all_keys = set(ft.keys()) | set(fw.keys()) | set(d.keys())
+    non_shared_keys = all_keys - shared_keys
+    
+    # Raise warnings for non-shared keys
+    if non_shared_keys and warn:
+        warnings.warn(f"Keys not shared across all dictionaries: {non_shared_keys}")
+    
+    # Map for field types
+    field_type = {
         "Numeric": "F",
         "String": "A",
         "Date": "DATE"
     }
 
-    for key in field_type:
-        f_type = field_type_map[field_type[key]]
-        f_width = field_width[key]
-        dec = decimals[key]
+    # Construct the output dictionary
+    combined_dict = {key: (field_type.get(ft[key]), fw[key], d[key]) for key in shared_keys}
+    
+    return combined_dict
+    
+def _pack_variable_types(data: dict[str, tuple[str, int, int]]
+                         ) -> dict[str, str]:
+    """Private function to perform the logic for `pack_variable_types`."""
+    d = {}
+    
+    for var, values in data.items():
+        f_type, f_width, dec = values
         
-        if field_type[key] == "Numeric" and dec > 0:
-            d[key] = f"{f_type}{f_width}.{dec}"
+        if f_type == "F" and dec > 0:
+            d[var] = f"{f_type}{f_width}.{dec}"
         else:
-            d[key] = f"{f_type}{f_width}"
+            d[var] = f"{f_type}{f_width}"
 
     return d
 
-# %% ../nbs/00_read.ipynb 24
+# %% ../nbs/00_read.ipynb 25
 # TODO: could be actual Data and Metadata class/types
 def write_sav(dst_path: str|Path, # path to save output file
               df: pl.LazyFrame, # raw data
